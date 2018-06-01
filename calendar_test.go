@@ -11,7 +11,7 @@ func parseDT(s string) time.Time {
 	return t
 }
 
-func TestNextWorkingDay(t *testing.T) {
+func TestGetNearestWorkingDay(t *testing.T) {
 	defaultWorkingTimes := DefaultWorkingTimes{
 		Monday:    ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
 		Tuesday:   ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
