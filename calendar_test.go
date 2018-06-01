@@ -105,14 +105,12 @@ func TestParseDaytimePeriod(t *testing.T) {
 		want DaytimePeriod
 	}{
 		{"08:00-18:00", DaytimePeriod{
-			Start:    Time{8, 0},
-			End:      Time{18, 0},
-			Duration: 10 * time.Hour,
+			Start: Time{8, 0},
+			End:   Time{18, 0},
 		}},
 		{"09:15-17:15", DaytimePeriod{
-			Start:    Time{9, 15},
-			End:      Time{17, 15},
-			Duration: 8 * time.Hour,
+			Start: Time{9, 15},
+			End:   Time{17, 15},
 		}},
 	}
 
