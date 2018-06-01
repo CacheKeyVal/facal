@@ -32,7 +32,7 @@ func (c *Calendar) IsHoliday(d Date) bool {
 	return false
 }
 
-func (c *Calendar) NextWorkingDay(initialDate time.Time) DateWorkingTimes {
+func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes {
 	resultDate := initialDate
 	t := TimeOf(resultDate)
 
@@ -176,9 +176,8 @@ func ParseWorkingTimes(wt string, bt []string) *WorkingTimes {
 // ParseDaytimePeriod parses string in format "08:00-18:00" to DaytimePeriod
 func ParseDaytimePeriod(s string) DaytimePeriod {
 	var (
-		from, to       Time
-		fromSec, toSec int
-		err            error
+		from, to Time
+		err      error
 	)
 	sl := strings.Split(s, "-")
 	from, err = ParseTime(sl[0])
@@ -194,13 +193,9 @@ func ParseDaytimePeriod(s string) DaytimePeriod {
 		panic("invalid time")
 	}
 
-	fromSec = from.Hour*60*60 + from.Minute*60
-	toSec = to.Hour*60*60 + to.Minute*60
-
 	p := DaytimePeriod{
-		Start:    from,
-		End:      to,
-		Duration: time.Duration(toSec-fromSec) * time.Second,
+		Start: from,
+		End:   to,
 	}
 	return p
 }

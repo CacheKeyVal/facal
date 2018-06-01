@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func parseDateTime(s string) time.Time {
-	t, _ := time.Parse(time.RFC822, s)
+func parseDT(s string) time.Time {
+	t, _ := time.Parse(time.RFC822, s+" UTC")
 	return t
 }
 
@@ -70,31 +70,31 @@ func TestNextWorkingDay(t *testing.T) {
 		})
 	}
 
-	oksarCalendar := New(defaultWorkingTimes, workingTimesExceptions)
+	factoryCalendar := New(defaultWorkingTimes, workingTimesExceptions)
 
 	testCases := []struct {
 		t    time.Time
 		want Date
 	}{
-		{parseDateTime("02 Jan 18 15:04 UTC"), Date{2018, time.January, 9}},
-		{parseDateTime("04 Jan 18 15:04 UTC"), Date{2018, time.January, 9}},
-		{parseDateTime("08 May 18 19:04 UTC"), Date{2018, time.May, 10}},
-		{parseDateTime("31 May 18 19:30 UTC"), Date{2018, time.May, 31}},
-		{parseDateTime("31 May 18 05:30 UTC"), Date{2018, time.May, 31}},
-		{parseDateTime("31 May 18 20:00 UTC"), Date{2018, time.June, 4}},
-		{parseDateTime("01 Jun 18 12:04 UTC"), Date{2018, time.June, 4}},
-		{parseDateTime("02 Jun 18 18:04 UTC"), Date{2018, time.June, 4}},
-		{parseDateTime("03 Jun 18 22:04 UTC"), Date{2018, time.June, 4}},
-		{parseDateTime("28 Dec 18 16:00 UTC"), Date{2018, time.December, 28}},
-		{parseDateTime("28 Dec 18 19:00 UTC"), Date{2019, time.January, 1}},
-		{parseDateTime("31 Dec 18 16:00 UTC"), Date{2019, time.January, 1}},
-		{parseDateTime("31 Dec 18 22:04 UTC"), Date{2019, time.January, 1}},
+		{parseDT("02 Jan 18 15:04"), Date{2018, time.January, 9}},
+		{parseDT("04 Jan 18 15:04"), Date{2018, time.January, 9}},
+		{parseDT("08 May 18 19:04"), Date{2018, time.May, 10}},
+		{parseDT("31 May 18 19:30"), Date{2018, time.May, 31}},
+		{parseDT("31 May 18 05:30"), Date{2018, time.May, 31}},
+		{parseDT("31 May 18 20:00"), Date{2018, time.June, 4}},
+		{parseDT("01 Jun 18 12:04"), Date{2018, time.June, 4}},
+		{parseDT("02 Jun 18 18:04"), Date{2018, time.June, 4}},
+		{parseDT("03 Jun 18 22:04"), Date{2018, time.June, 4}},
+		{parseDT("28 Dec 18 16:00"), Date{2018, time.December, 28}},
+		{parseDT("28 Dec 18 19:00"), Date{2019, time.January, 1}},
+		{parseDT("31 Dec 18 16:00"), Date{2019, time.January, 1}},
+		{parseDT("31 Dec 18 22:04"), Date{2019, time.January, 1}},
 	}
 
 	for _, testCase := range testCases {
-		res := oksarCalendar.NextWorkingDay(testCase.t)
+		res := factoryCalendar.GetNearestWorkingDay(testCase.t)
 		if !reflect.DeepEqual(res.Date, testCase.want) {
-			t.Errorf("NextWorkingDay() want %v, but %v given", testCase.want, res.Date)
+			t.Errorf("GetNearestWorkingDay() want %v, but %v given", testCase.want, res.Date)
 		}
 	}
 }
