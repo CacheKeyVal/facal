@@ -38,6 +38,7 @@ func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes 
 
 	var isInitDate = true
 
+	// todo check for infinity
 	for {
 		d := DateOf(resultDate)
 		if e, ok := c.exceptions.Get(d); ok {
@@ -45,55 +46,10 @@ func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes 
 				return e
 			}
 		} else {
-			switch resultDate.Weekday() {
-			case time.Monday:
-				if c.workingTimes.Monday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Monday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Monday)
-				}
-			case time.Tuesday:
-				if c.workingTimes.Tuesday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Tuesday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Tuesday)
-				}
-			case time.Wednesday:
-				if c.workingTimes.Wednesday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Wednesday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Wednesday)
-				}
-			case time.Thursday:
-				if c.workingTimes.Thursday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Thursday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Thursday)
-				}
-			case time.Friday:
-				if c.workingTimes.Friday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Friday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Friday)
-				}
-			case time.Saturday:
-				if c.workingTimes.Saturday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Saturday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Saturday)
-				}
-			case time.Sunday:
-				if c.workingTimes.Sunday == nil {
-					break
-				}
-				if (isInitDate && c.workingTimes.Sunday.Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes.Sunday)
+			wd := resultDate.Weekday()
+			if c.workingTimes[wd] != nil {
+				if (isInitDate && c.workingTimes[wd].Workday.To.GreaterThan(t)) || !isInitDate {
+					return makeWorkingTimes(resultDate, c.workingTimes[wd])
 				}
 			}
 		}
@@ -125,15 +81,7 @@ func (wt *WorkingTimes) ToGetInTime(t Time) bool {
 	return false
 }
 
-type DefaultWorkingTimes struct {
-	Monday    *WorkingTimes
-	Tuesday   *WorkingTimes
-	Wednesday *WorkingTimes
-	Thursday  *WorkingTimes
-	Friday    *WorkingTimes
-	Saturday  *WorkingTimes
-	Sunday    *WorkingTimes
-}
+type DefaultWorkingTimes map[time.Weekday]*WorkingTimes
 
 type CalendarExceptions []DateWorkingTimes
 

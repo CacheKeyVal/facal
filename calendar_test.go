@@ -12,15 +12,12 @@ func parseDT(s string) time.Time {
 }
 
 func TestGetNearestWorkingDay(t *testing.T) {
-	defaultWorkingTimes := DefaultWorkingTimes{
-		Monday:    ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
-		Tuesday:   ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
-		Wednesday: ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
-		Thursday:  ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"}),
-		Friday:    ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00", "16:00-16:30"}),
-		Saturday:  nil,
-		Sunday:    nil,
-	}
+	defaultWorkingTimes := make(DefaultWorkingTimes)
+	defaultWorkingTimes[time.Monday] = ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"})
+	defaultWorkingTimes[time.Tuesday] = ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"})
+	defaultWorkingTimes[time.Wednesday] = ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"})
+	defaultWorkingTimes[time.Thursday] = ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00"})
+	defaultWorkingTimes[time.Friday] = ParseWorkingTimes("07:00-18:00", []string{"12:00-13:00", "16:00-16:30"})
 
 	workingTimesExceptions := []DateWorkingTimes{
 		{
