@@ -41,7 +41,7 @@ func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes 
 	for {
 		d := DateOf(resultDate)
 		if e, ok := c.exceptions.Get(d); ok {
-			if e.WorkingDayTimes != nil && ((isInitDate && e.WorkingDayTimes.Workday.End.GreaterThan(t)) || !isInitDate) {
+			if e.WorkingDayTimes != nil && ((isInitDate && e.WorkingDayTimes.Workday.To.GreaterThan(t)) || !isInitDate) {
 				return e
 			}
 		} else {
@@ -50,49 +50,49 @@ func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes 
 				if c.workingTimes.Monday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Monday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Monday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Monday)
 				}
 			case time.Tuesday:
 				if c.workingTimes.Tuesday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Tuesday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Tuesday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Tuesday)
 				}
 			case time.Wednesday:
 				if c.workingTimes.Wednesday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Wednesday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Wednesday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Wednesday)
 				}
 			case time.Thursday:
 				if c.workingTimes.Thursday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Thursday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Thursday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Thursday)
 				}
 			case time.Friday:
 				if c.workingTimes.Friday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Friday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Friday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Friday)
 				}
 			case time.Saturday:
 				if c.workingTimes.Saturday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Saturday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Saturday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Saturday)
 				}
 			case time.Sunday:
 				if c.workingTimes.Sunday == nil {
 					break
 				}
-				if (isInitDate && c.workingTimes.Sunday.Workday.End.GreaterThan(t)) || !isInitDate {
+				if (isInitDate && c.workingTimes.Sunday.Workday.To.GreaterThan(t)) || !isInitDate {
 					return makeWorkingTimes(resultDate, c.workingTimes.Sunday)
 				}
 			}
@@ -110,12 +110,6 @@ func makeWorkingTimes(dt time.Time, wt *WorkingTimes) DateWorkingTimes {
 		Date:            DateOf(dt),
 		WorkingDayTimes: wt,
 	}
-}
-
-type DaytimePeriod struct {
-	Start    Time
-	End      Time
-	Duration time.Duration
 }
 
 type WorkingTimes struct {
@@ -189,13 +183,13 @@ func ParseDaytimePeriod(s string) DaytimePeriod {
 		panic("invalid time")
 	}
 
-	if to.Hour < from.Hour || (to.Hour == from.Hour && to.Minute < from.Minute) {
+	if to.hour < from.hour || (to.hour == from.hour && to.minute < from.minute) {
 		panic("invalid time")
 	}
 
 	p := DaytimePeriod{
-		Start: from,
-		End:   to,
+		From: from,
+		To:   to,
 	}
 	return p
 }

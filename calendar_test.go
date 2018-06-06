@@ -105,18 +105,18 @@ func TestParseDaytimePeriod(t *testing.T) {
 		want DaytimePeriod
 	}{
 		{"08:00-18:00", DaytimePeriod{
-			Start: Time{8, 0},
-			End:   Time{18, 0},
+			From: Time{8, 0},
+			To:   Time{18, 0},
 		}},
 		{"09:15-17:15", DaytimePeriod{
-			Start: Time{9, 15},
-			End:   Time{17, 15},
+			From: Time{9, 15},
+			To:   Time{17, 15},
 		}},
 	}
 
 	for _, testCase := range testCases {
 		res := ParseDaytimePeriod(testCase.s)
-		if !res.Start.Equal(testCase.want.Start) || !res.End.Equal(testCase.want.End) || res.Duration != testCase.want.Duration {
+		if !res.From.Equal(testCase.want.From) || !res.To.Equal(testCase.want.To) {
 			t.Errorf("ParseDaytimePeriod() wantErr %v, %v", res, testCase.want)
 		}
 	}

@@ -1,15 +1,31 @@
 package facal
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // A Date represents a date (year, month, day).
 //
 // This type does not include location information, and therefore does not
 // describe a unique 24-hour timespan.
 type Date struct {
-	Year  int        // Year (e.g., 2014).
-	Month time.Month // Month of the year (January = 1, ...).
-	Day   int        // Day of the month, starting at 1.
+	year  int        // year (e.g., 2014).
+	month time.Month // month of the year (January = 1, ...).
+	day   int        // day of the month, starting at 1.
+}
+
+func (d *Date) UnmarshalJSON(data []byte) error {
+	var str string
+	json.Unmarshal(data, &str)
+	date, err := ParseDate(str)
+	if err != nil {
+		return err
+	}
+	d.year = date.year
+	d.month = date.month
+	d.day = date.day
+	return nil
 }
 
 // In returns the time corresponding to time 00:00:00 of the date in the location.
@@ -18,12 +34,12 @@ type Date struct {
 // on a different day. For example, if loc is America/Indiana/Vincennes, then both
 //     time.Date(1955, time.May, 1, 0, 0, 0, 0, loc)
 // and
-//     Date{Year: 1955, Month: time.May, Day: 1}.In(loc)
+//     Date{year: 1955, month: time.May, day: 1}.In(loc)
 // return 23:00:00 on April 30, 1955.
 //
 // In panics if loc is nil.
 func (d Date) In(loc *time.Location) time.Time {
-	return time.Date(d.Year, d.Month, d.Day, 0, 0, 0, 0, loc)
+	return time.Date(d.year, d.month, d.day, 0, 0, 0, 0, loc)
 }
 
 // DaysSince returns the signed number of days between the date and s, not including the end day.
@@ -38,7 +54,7 @@ func (d Date) DaysSince(s Date) (days int) {
 // DateOf returns the Date in which a time occurs in that time's location.
 func DateOf(t time.Time) Date {
 	var d Date
-	d.Year, d.Month, d.Day = t.Date()
+	d.year, d.month, d.day = t.Date()
 	return d
 }
 
@@ -59,25 +75,37 @@ func ParseDate(s string) (Date, error) {
 // This type exists to represent the TIME type in storage-based APIs like BigQuery.
 // Most operations on Times are unlikely to be meaningful. Prefer the DateTime type.
 type Time struct {
-	Hour   int // The hour of the day in 24-hour format; range [0-23]
-	Minute int // The minute of the hour; range [0-59]
+	hour   int // The hour of the day in 24-hour format; range [0-23]
+	minute int // The minute of the hour; range [0-59]
+}
+
+func (t *Time) UnmarshalJSON(data []byte) error {
+	var str string
+	json.Unmarshal(data, &str)
+	pt, err := ParseTime(str)
+	if err != nil {
+		return err
+	}
+	t.hour = pt.hour
+	t.minute = pt.minute
+	return nil
 }
 
 // TimeOf returns true if t is equal with ct
 func (t Time) Equal(ct Time) bool {
-	return t.Hour == ct.Hour && t.Minute == ct.Minute
+	return t.hour == ct.hour && t.minute == ct.minute
 }
 
 // TimeOf returns true if t is greater than ct
 func (t Time) GreaterThan(ct Time) bool {
-	return (t.Hour*60 + t.Minute) > (ct.Hour*60 + ct.Minute)
+	return (t.hour*60 + t.minute) > (ct.hour*60 + ct.minute)
 }
 
 // TimeOf returns the Time representing the time of day in which a time occurs
 // in that time's location. It ignores the date.
 func TimeOf(t time.Time) Time {
 	var tm Time
-	tm.Hour, tm.Minute, _ = t.Clock()
+	tm.hour, tm.minute, _ = t.Clock()
 	return tm
 }
 
@@ -92,4 +120,9 @@ func ParseTime(s string) (Time, error) {
 		return Time{}, err
 	}
 	return TimeOf(t), nil
+}
+
+type DaytimePeriod struct {
+	From Time `json:"from"`
+	To   Time `json:"to"`
 }
