@@ -28,6 +28,11 @@ func (d *Date) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Equal returns true if d is equal with cd
+func (d Date) Equal(cd Date) bool {
+	return d.year == cd.year && d.month == cd.month && d.day == cd.day
+}
+
 // In returns the time corresponding to time 00:00:00 of the date in the location.
 //
 // In is always consistent with time.Date, even when time.Date returns a time
@@ -43,7 +48,6 @@ func (d Date) In(loc *time.Location) time.Time {
 }
 
 // DaysSince returns the signed number of days between the date and s, not including the end day.
-// This is the inverse operation to AddDays.
 func (d Date) DaysSince(s Date) (days int) {
 	// We convert to Unix time so we do not have to worry about leap seconds:
 	// Unix time increases by exactly 86400 seconds per day.
@@ -75,8 +79,8 @@ func ParseDate(s string) (Date, error) {
 // This type exists to represent the TIME type in storage-based APIs like BigQuery.
 // Most operations on Times are unlikely to be meaningful. Prefer the DateTime type.
 type Time struct {
-	hour   int // The hour of the day in 24-hour format; range [0-23]
-	minute int // The minute of the hour; range [0-59]
+	Hour   int // The hour of the day in 24-hour format; range [0-23]
+	Minute int // The minute of the hour; range [0-59]
 }
 
 func (t *Time) UnmarshalJSON(data []byte) error {
@@ -86,26 +90,26 @@ func (t *Time) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	t.hour = pt.hour
-	t.minute = pt.minute
+	t.Hour = pt.Hour
+	t.Minute = pt.Minute
 	return nil
 }
 
-// TimeOf returns true if t is equal with ct
+// Equal returns true if t is equal with ct
 func (t Time) Equal(ct Time) bool {
-	return t.hour == ct.hour && t.minute == ct.minute
+	return t.Hour == ct.Hour && t.Minute == ct.Minute
 }
 
 // TimeOf returns true if t is greater than ct
 func (t Time) GreaterThan(ct Time) bool {
-	return (t.hour*60 + t.minute) > (ct.hour*60 + ct.minute)
+	return (t.Hour*60 + t.Minute) > (ct.Hour*60 + ct.Minute)
 }
 
 // TimeOf returns the Time representing the time of day in which a time occurs
 // in that time's location. It ignores the date.
 func TimeOf(t time.Time) Time {
 	var tm Time
-	tm.hour, tm.minute, _ = t.Clock()
+	tm.Hour, tm.Minute, _ = t.Clock()
 	return tm
 }
 
@@ -123,6 +127,6 @@ func ParseTime(s string) (Time, error) {
 }
 
 type DaytimePeriod struct {
-	From Time `json:"from"`
+	From Time `json:"d"`
 	To   Time `json:"to"`
 }

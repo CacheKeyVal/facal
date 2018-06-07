@@ -28,28 +28,27 @@ func (c *Calendar) GetWorkingTimes(d Date) DaytimePeriod {
 	return DaytimePeriod{}
 }
 
-func (c *Calendar) IsHoliday(d Date) bool {
-	return false
+func (c *Calendar) IsHoliday(t time.Time) bool {
+	return c.GetWorkingDays(t, DateOf(t)) != 1
 }
 
-func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes {
-	resultDate := initialDate
-	t := TimeOf(resultDate)
+func (c *Calendar) GetNearestWorkingDay(dt time.Time) DateWorkingTimes {
+	t := TimeOf(dt)
 
 	var isInitDate = true
 
 	// todo check for infinity
 	for {
-		d := DateOf(resultDate)
+		d := DateOf(dt)
 		if e, ok := c.exceptions.Get(d); ok {
 			if e.WorkingDayTimes != nil && ((isInitDate && e.WorkingDayTimes.Workday.To.GreaterThan(t)) || !isInitDate) {
 				return e
 			}
 		} else {
-			wd := resultDate.Weekday()
+			wd := dt.Weekday()
 			if c.workingTimes[wd] != nil {
 				if (isInitDate && c.workingTimes[wd].Workday.To.GreaterThan(t)) || !isInitDate {
-					return makeWorkingTimes(resultDate, c.workingTimes[wd])
+					return makeWorkingTimes(dt, c.workingTimes[wd])
 				}
 			}
 		}
@@ -57,8 +56,38 @@ func (c *Calendar) GetNearestWorkingDay(initialDate time.Time) DateWorkingTimes 
 		if isInitDate {
 			isInitDate = false
 		}
-		resultDate = resultDate.Add(24 * time.Hour)
+		dt = dt.Add(24 * time.Hour)
 	}
+}
+
+func (c *Calendar) GetWorkingDays(from time.Time, to Date) int {
+	t := TimeOf(from)
+	dest := to.In(time.UTC).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+
+	var isInitDate = true
+
+	total := 0
+	for from.Sub(dest) < 0 {
+		d := DateOf(from)
+		if e, ok := c.exceptions.Get(d); ok {
+			if e.WorkingDayTimes != nil && ((isInitDate && e.WorkingDayTimes.Workday.To.GreaterThan(t)) || !isInitDate) {
+				total++
+			}
+		} else {
+			wd := from.Weekday()
+			if c.workingTimes[wd] != nil {
+				if (isInitDate && c.workingTimes[wd].Workday.To.GreaterThan(t)) || !isInitDate {
+					total++
+				}
+			}
+		}
+
+		if isInitDate {
+			isInitDate = false
+		}
+		from = from.Add(24 * time.Hour)
+	}
+	return total
 }
 
 func makeWorkingTimes(dt time.Time, wt *WorkingTimes) DateWorkingTimes {
@@ -131,7 +160,7 @@ func ParseDaytimePeriod(s string) DaytimePeriod {
 		panic("invalid time")
 	}
 
-	if to.hour < from.hour || (to.hour == from.hour && to.minute < from.minute) {
+	if to.Hour < from.Hour || (to.Hour == from.Hour && to.Minute < from.Minute) {
 		panic("invalid time")
 	}
 
