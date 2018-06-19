@@ -119,6 +119,9 @@ func TimeOf(t time.Time) Time {
 // consisting of a decimal point followed by one to nine decimal digits.
 // (RFC3339 admits only one digit after the decimal point).
 func ParseTime(s string) (Time, error) {
+	if s == "24:00" {
+		return Time{24, 00}, nil
+	}
 	t, err := time.Parse("15:04", s)
 	if err != nil {
 		return Time{}, err
